@@ -1,0 +1,50 @@
+package org.example;
+
+import org.example.Alarm;
+import org.example.Sensor;
+
+global java.util.List events;
+
+rule "Senkung der Temperatur"
+    salience 20
+    when
+        sensor: Sensor(temperature > 100)
+    then
+        events.add("Temperatur wird gesenkt...");
+        sensor.setTemperature(80);
+        update(sensor);
+end
+
+rule "Senkung des Drucks"
+    salience 20
+    when
+        sensor: Sensor(pressure > 150)
+    then
+        events.add("Druck wird gesenkt...");
+        sensor.setPressure(Math.random() > 0.8 ? 80 : 200);
+        update(sensor);
+end
+
+rule "Feststellung von Problemen"
+    salience 10
+    when
+        sensor: (Sensor(temperature > 100) or Sensor(pressure > 150))
+    then
+        events.add("Problem festgestellt...");
+        insert(new Alarm());
+end
+
+rule "Überprüfung von Alarm"
+    when
+        Alarm()
+    then
+        events.add("Ergebnis: Alarm!");
+end
+
+
+rule "Überprüfung von Erfolg"
+    when
+        not Alarm()
+    then
+        events.add("Ergebnis: Erfolg!");
+end
